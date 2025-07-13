@@ -15,6 +15,42 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>RoomListServlet</servlet-name>
+        <servlet-class>com.reservation.servlet.RoomListServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RoomListServlet</servlet-name>
+        <url-pattern>/rooms</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>BookRoomServlet</servlet-name>
+        <servlet-class>com.reservation.servlet.BookRoomServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>BookRoomServlet</servlet-name>
+        <url-pattern>/book-room</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ConfirmBookingServlet</servlet-name>
+        <servlet-class>com.reservation.servlet.ConfirmBookingServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ConfirmBookingServlet</servlet-name>
+        <url-pattern>/confirm-booking</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>BookingListServlet</servlet-name>
+        <servlet-class>com.reservation.servlet.BookingListServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>BookingListServlet</servlet-name>
+        <url-pattern>/bookings</url-pattern>
+    </servlet-mapping>
+
+
+    <servlet>
         <servlet-name>LoginServlet</servlet-name>
         <servlet-class>com.reservation.servlet.LoginServlet</servlet-class>
     </servlet>
