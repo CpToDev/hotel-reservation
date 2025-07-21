@@ -5,11 +5,11 @@ import com.reservation.model.Room;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
+
 import java.io.IOException;
 import java.util.List;
 
-
-public class RoomListServlet extends HttpServlet {
+public class AvailableRoomsServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -17,15 +17,12 @@ public class RoomListServlet extends HttpServlet {
         String startDate = request.getParameter("start_date");
         String endDate = request.getParameter("end_date");
 
-        List<Room> rooms;
-        if (startDate != null && endDate != null) {
+        List<Room> rooms = null;
+        if (startDate != null && endDate != null && !startDate.isEmpty() && !endDate.isEmpty()) {
             rooms = RoomRepository.getAvailableRooms(startDate, endDate);
-        } else {
-            rooms = RoomRepository.getAvailableRooms("1900-01-01", "2999-12-31");
         }
 
         request.setAttribute("rooms", rooms);
-
         request.getRequestDispatcher("/available-rooms.jsp").forward(request, response);
     }
 }

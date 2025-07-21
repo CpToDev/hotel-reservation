@@ -5,19 +5,25 @@ public class Room {
     private String type;
     private double price;
     private String facility;
-    private boolean available;
 
-    public Room(int id, String type, double price, String facility, boolean available) {
+    public Room() {}
+
+    public Room(int id, String type, double price, String facility) {
         this.id = id;
         this.type = type;
         this.price = price;
         this.facility = facility;
-        this.available = available;
     }
 
     public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+
     public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
+
     public double getPrice() { return price; }
+    public void setPrice(double price) { this.price = price; }
+
     public String getFacility() { return facility; }
-    public boolean isAvailable() { return available; }
+    public void setFacility(String facility) { this.facility = facility; }
 }

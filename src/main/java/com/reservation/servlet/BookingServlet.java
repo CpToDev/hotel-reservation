@@ -30,7 +30,7 @@ public class BookingServlet extends HttpServlet {
 
         LocalDate checkinDate = LocalDate.parse(checkinDateStr);
         LocalDate today = LocalDate.now();
-        if (checkinDate.isBefore(today) || checkinDate.isAfter(today.plusDays(14))) {
+        if (checkinDate.isBefore(today) || checkinDate.isAfter(today.plusDays(13))) {
             response.sendRedirect("rooms?error=invalid_date");
             return;
         }

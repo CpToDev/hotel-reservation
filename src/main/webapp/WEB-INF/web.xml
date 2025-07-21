@@ -33,6 +33,33 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>SearchAvailableRoomsServlet</servlet-name>
+        <servlet-class>com.reservation.servlet.SearchAvailableRoomsServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SearchAvailableRoomsServlet</servlet-name>
+        <url-pattern>/search-available-rooms</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>CancelBookingServlet</servlet-name>
+        <servlet-class>com.reservation.servlet.CancelBookingServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CancelBookingServlet</servlet-name>
+        <url-pattern>/cancel-booking</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>AvailableRoomsServlet</servlet-name>
+        <servlet-class>com.reservation.servlet.AvailableRoomsServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AvailableRoomsServlet</servlet-name>
+        <url-pattern>/available-rooms</url-pattern>
+    </servlet-mapping>
+
+
+    <servlet>
         <servlet-name>ConfirmBookingServlet</servlet-name>
         <servlet-class>com.reservation.servlet.ConfirmBookingServlet</servlet-class>
     </servlet>

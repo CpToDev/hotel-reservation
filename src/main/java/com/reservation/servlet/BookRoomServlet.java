@@ -18,10 +18,15 @@ public class BookRoomServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String roomIdStr = request.getParameter("id");
+    String checkinDate = request.getParameter("checkin_date");
+    String checkoutDate = request.getParameter("checkout_date");
         int roomId = Integer.parseInt(roomIdStr);
         Room room = RoomRepository.getRoomById(roomId);
 
         request.setAttribute("room", room);
+        request.setAttribute("checkin_date", checkinDate);
+        request.setAttribute("checkout_date", checkoutDate);
+
         request.getRequestDispatcher("/book_room_form.jsp").forward(request, response);
     }
 }
