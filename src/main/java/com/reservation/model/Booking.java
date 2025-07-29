@@ -16,26 +16,27 @@ public class Booking {
     private boolean cancelled;
     private String cancellationTime;
     private double cancellationFee;
+    private String bookingId;
 
     public Booking() {
     }
 
-    public Booking(int id, String userEmail, int roomId, String roomType, String checkinDate, String checkoutDate, int stayDays,
-                   String name, String dob, String aadhar, String address, String mobile) {
-        this.id = id;
-        this.userEmail = userEmail;
-        this.roomId = roomId;
-        this.roomType = roomType;
-        this.checkinDate = checkinDate;
-        this.checkoutDate = checkoutDate;
-        this.stayDays = stayDays;
-        this.name = name;
-        this.dob = dob;
-        this.aadhar = aadhar;
-        this.address = address;
-        this.mobile = mobile;
-    }
-
+    public Booking(int id, String bookingId, String userEmail, int roomId, String roomType, String checkinDate, String checkoutDate, int stayDays,
+               String name, String dob, String aadhar, String address, String mobile) {
+    this.id = id;
+    this.bookingId = bookingId;
+    this.userEmail = userEmail;
+    this.roomId = roomId;
+    this.roomType = roomType;
+    this.checkinDate = checkinDate;
+    this.checkoutDate = checkoutDate;
+    this.stayDays = stayDays;
+    this.name = name;
+    this.dob = dob;
+    this.aadhar = aadhar;
+    this.address = address;
+    this.mobile = mobile;
+}
     public int getId() {
         return id;
     }
@@ -139,5 +140,12 @@ public class Booking {
     }
     public void setCancellationFee(double cancellationFee) {
         this.cancellationFee = cancellationFee;
+    }
+    public String getBookingId() {
+    return bookingId;
+    }
+
+    public void setBookingId(String bookingId) {
+        this.bookingId = bookingId;
     }
 }

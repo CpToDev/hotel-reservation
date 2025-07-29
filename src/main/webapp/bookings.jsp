@@ -18,8 +18,8 @@
         <table class="table table-bordered shadow">
             <thead class="table-primary">
             <tr>
+                <th>Booking ID</th>
                 <th>Room No</th>
-                <th>Room Type</th>
                 <th>Check-in Date</th>
                 <th>Check-out Date</th>
                 <th>Days</th>
@@ -32,8 +32,8 @@
             <tbody>
             <% for (Booking b : bookings) { %>
                 <tr>
+                    <td><%= b.getBookingId() %></td>
                     <td><%= b.getRoomId() %></td>
-                    <td><%= b.getRoomType() %></td>
                     <td><%= b.getCheckinDate() %></td>
                     <td><%= b.getCheckoutDate() %></td>
                     <td><%= b.getStayDays() %></td>
