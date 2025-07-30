@@ -32,7 +32,12 @@
             <tbody>
             <% for (Booking b : bookings) { %>
                 <tr>
-                    <td><%= b.getBookingId() %></td>
+
+                    <td>
+                        <a href="booking-details?booking_id=<%= b.getBookingId() %>" class="text-decoration-none text-primary">
+                            <%= b.getBookingId() %>
+                        </a>
+                    </td>
                     <td><%= b.getRoomId() %></td>
                     <td><%= b.getCheckinDate() %></td>
                     <td><%= b.getCheckoutDate() %></td>

@@ -1,5 +1,7 @@
 package com.reservation.model;
 
+import java.time.LocalDateTime;
+
 public class Booking {
     private int id;
     private String userEmail;
@@ -14,7 +16,7 @@ public class Booking {
     private String address;
     private String mobile;
     private boolean cancelled;
-    private String cancellationTime;
+    private LocalDateTime cancellationTime;
     private double cancellationFee;
     private String bookingId;
 
@@ -128,10 +130,10 @@ public class Booking {
         this.cancelled = cancelled;
     }
 
-    public String getCancellationTime() {
+    public LocalDateTime getCancellationTime() {
         return cancellationTime;
     }
-    public void setCancellationTime(String cancellationTime) {
+    public void setCancellationTime(LocalDateTime cancellationTime) {
         this.cancellationTime = cancellationTime;
     }
 

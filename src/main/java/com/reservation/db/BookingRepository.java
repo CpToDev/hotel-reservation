@@ -3,6 +3,8 @@ package com.reservation.db;
 import com.reservation.model.Booking;
 
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -40,13 +42,14 @@ public class BookingRepository {
     }
 
     // Cancel existing booking and apply cancellation fee
-    public static void cancelBooking(int bookingId, double fee) {
-        String update = "UPDATE bookings SET cancelled = 1, cancellation_fee = ? WHERE id = ?";
+    public static void cancelBooking(int bookingId, Timestamp cancellationTime, double fee) {
+        String update = "UPDATE bookings SET cancelled = 1, cancellation_fee = ?, cancellation_time = ? WHERE id = ?";
         try (Connection conn = DriverManager.getConnection(DB_URL);
              PreparedStatement pstmt = conn.prepareStatement(update)) {
 
             pstmt.setDouble(1, fee);
-            pstmt.setInt(2, bookingId);
+            pstmt.setTimestamp(2, cancellationTime);
+            pstmt.setInt(3, bookingId);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -87,5 +90,35 @@ public class BookingRepository {
         }
         return bookings;
     }
+    public static Booking getBookingByBookingId(String bookingId) {
+    String query = "SELECT * FROM bookings WHERE booking_id = ?";
+    try (Connection conn = DriverManager.getConnection(DB_URL);
+         PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+        pstmt.setString(1, bookingId);
+        ResultSet rs = pstmt.executeQuery();
+
+        if (rs.next()) {
+            Booking booking = new Booking();
+            booking.setBookingId(rs.getString("booking_id"));
+            booking.setUserEmail(rs.getString("user_email"));
+            booking.setRoomId(rs.getInt("room_id"));
+            booking.setCheckinDate(rs.getString("checkin_date"));
+            booking.setCheckoutDate(rs.getString("checkout_date"));
+            booking.setCancelled(rs.getBoolean("cancelled"));
+            booking.setCancellationFee(rs.getDouble("cancellation_fee"));
+
+            Timestamp cancellationTimeStr = rs.getTimestamp("cancellation_time");
+            if (cancellationTimeStr != null) {
+                booking.setCancellationTime(cancellationTimeStr.toLocalDateTime());
+            }
+            return booking;
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return null;
+}
 
 }

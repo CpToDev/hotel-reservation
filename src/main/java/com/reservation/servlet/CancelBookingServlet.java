@@ -7,15 +7,18 @@ import com.reservation.model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 public class CancelBookingServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
         if (user == null) {
@@ -24,20 +27,28 @@ public class CancelBookingServlet extends HttpServlet {
         }
 
         int bookingId = Integer.parseInt(request.getParameter("booking_id"));
-        String checkinDateStr = request.getParameter("checkin_date");
+        String checkinDateStr = request.getParameter("checkin_date"); // e.g., 2024-07-30
 
-        LocalDate checkinDate = LocalDate.parse(checkinDateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        LocalDate today = LocalDate.now();
+        // Parse check-in date, assume time is 12:00 AM
+        LocalDate checkinDate = LocalDate.parse(checkinDateStr);
+        LocalDateTime checkinDateTime = checkinDate.atStartOfDay(); // 00:00
 
-        long hoursDiff = ChronoUnit.HOURS.between(today.atStartOfDay(), checkinDate.atStartOfDay());
+        // Capture cancellation time
+        LocalDateTime cancellationTime = LocalDateTime.now();
 
+        // Calculate difference in hours
+        long hoursLeft = Duration.between(cancellationTime, checkinDateTime).toHours();
+
+        // Calculate cancellation fee
         double fee = 0;
-        if (hoursDiff < 48) {
-            fee = (48 - hoursDiff) * 10;  // ₹10 per hour for late cancellation
+        if (hoursLeft < 48) {
+            fee = (48 - hoursLeft) * 10; // ₹10 per missing hour
         }
 
-        BookingRepository.cancelBooking(bookingId, fee);
+        // Call repository method
+        BookingRepository.cancelBooking(bookingId, Timestamp.valueOf(cancellationTime), fee);
 
+        // Load updated bookings
         List<Booking> bookings = BookingRepository.getBookingsByUser(user.getEmail());
         request.setAttribute("bookings", bookings);
         request.getRequestDispatcher("/bookings.jsp").forward(request, response);
