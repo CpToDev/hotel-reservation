@@ -1,25 +1,24 @@
 package com.reservation.servlet;
 
-import com.reservation.db.BookingRepository;
-import com.reservation.model.Booking;
+import com.reservation.db.RoomRepository;
+import com.reservation.model.Room;
 import com.reservation.model.User;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.*;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
 import java.io.IOException;
+import java.util.Collections;
 
 import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
 
-class BookingDetailsServletTest {
+class AvailableRoomsServletTest {
 
     @InjectMocks
-    private BookingDetailsServlet servlet;
+    private AvailableRoomsServlet servlet;
 
     @Mock
     private HttpServletRequest request;
@@ -30,22 +29,13 @@ class BookingDetailsServletTest {
     @Mock
     private RequestDispatcher dispatcher;
 
-    private static MockedStatic<BookingRepository> bookingMock;
-
-
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        bookingMock = mockStatic(BookingRepository.class);
-    }
-
-    @AfterEach
-    void tearDown() {
-        bookingMock.close();
     }
 
     @Test
-    void testRedirectsToLoginIfUserNotInSession() throws Exception {
+    void testRedirectsToLoginIfUserNull() throws Exception {
         when(request.getSession()).thenReturn(session);
         when(session.getAttribute("user")).thenReturn(null);
 
@@ -55,28 +45,33 @@ class BookingDetailsServletTest {
     }
 
     @Test
-    void testReturnsErrorIfBookingIdMissing() throws Exception {
+    void testDoesNotFetchRoomsIfDatesMissing() throws Exception {
         when(request.getSession()).thenReturn(session);
         when(session.getAttribute("user")).thenReturn(new User("user@gmail.com","skffororrorof"));
-        when(request.getParameter("booking_id")).thenReturn(null);
+        when(request.getParameter("start_date")).thenReturn(null);
+        when(request.getParameter("end_date")).thenReturn(null);
+        when(request.getRequestDispatcher("/available-rooms.jsp")).thenReturn(dispatcher);
 
         servlet.doGet(request, response);
 
-        verify(response).sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing booking ID");
+        verify(request).setAttribute("rooms", null);
+        verify(dispatcher).forward(request, response);
     }
 
     @Test
-    void testForwardsToJspOnValidBooking() throws Exception {
-        Booking mockBooking = new Booking();
+    void testFetchesRoomsIfDatesPresent() throws Exception {
         when(request.getSession()).thenReturn(session);
         when(session.getAttribute("user")).thenReturn(new User("user@gmail.com","skffororrorof"));
-        when(request.getParameter("booking_id")).thenReturn("BK123");
-        when(BookingRepository.getBookingByBookingId("BK123")).thenReturn(mockBooking);
-        when(request.getRequestDispatcher("/bookingDetails.jsp")).thenReturn(dispatcher);
+        when(request.getParameter("start_date")).thenReturn("2024-01-01");
+        when(request.getParameter("end_date")).thenReturn("2024-01-03");
+
+        mockStatic(RoomRepository.class);
+        when(RoomRepository.getAvailableRooms("2024-01-01", "2024-01-03")).thenReturn(Collections.emptyList());
+        when(request.getRequestDispatcher("/available-rooms.jsp")).thenReturn(dispatcher);
 
         servlet.doGet(request, response);
 
-        verify(request).setAttribute("booking", mockBooking);
+        verify(request).setAttribute("rooms", Collections.emptyList());
         verify(dispatcher).forward(request, response);
     }
 }
