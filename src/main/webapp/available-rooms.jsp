@@ -3,17 +3,10 @@
 <%@ page import="com.reservation.model.Room" %>
 <%
     List<Room> rooms = (List<Room>) request.getAttribute("rooms");
-%>
-<%
     String success = request.getParameter("success");
+    String startDateParam = request.getParameter("start_date");
+    String endDateParam = request.getParameter("end_date");
 %>
-
-<% if ("booked".equals(success)) { %>
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        Room booked successfully!
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-<% } %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -26,18 +19,32 @@
 <body class="bg-light">
 
 <div class="container mt-5">
+
+    <% if ("booked".equals(success)) { %>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            Room booked successfully!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+
     <h2 class="text-center mb-4">Search Available Rooms</h2>
 
-    <form action="search-available-rooms" method="get" class="row g-3 mb-4">
+    <!-- Alert container -->
+    <div id="dateAlert" class="alert alert-danger d-none" role="alert">
+        Checkout date must be at least 1 day after check-in date.
+    </div>
+
+    <!-- Search Form -->
+    <form id="searchForm" action="search-available-rooms" method="get" class="row g-3 mb-4">
         <div class="col-md-4">
             <label class="form-label">Check-in Date</label>
-            <input type="text" id="start_date" name="start_date" class="form-control" required>
+            <input type="text" id="start_date" name="start_date" value="<%= startDateParam != null ? startDateParam : "" %>" class="form-control" required>
             <div class="form-text">Must be at least 14 days from today.</div>
         </div>
 
         <div class="col-md-4">
             <label class="form-label">Check-out Date</label>
-            <input type="text" id="end_date" name="end_date" class="form-control" required>
+            <input type="text" id="end_date" name="end_date" value="<%= endDateParam != null ? endDateParam : "" %>" class="form-control" required>
             <div class="form-text">Must be after Check-in date.</div>
         </div>
 
@@ -48,39 +55,83 @@
 
     <h3 class="text-center mb-4">Available Rooms</h3>
     <div class="row">
-        <% if (rooms != null) {
+        <% if (rooms != null && !rooms.isEmpty()) {
             for (Room room : rooms) { %>
-            <div class="col-md-4">
-                <div class="card mb-4 shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">Room No: <%= room.getId() %></h5>
-                        <h6 class="card-subtitle mb-2 text-muted">Type: <%= room.getType() %></h6>
-                        <p class="card-text">Price: ₹<%= room.getPrice() %> / night</p>
-                        <p class="card-text">Facilities: <%= room.getFacility() %></p>
-                        <a href="book-room?id=<%= room.getId() %>&checkin_date=<%= request.getParameter("start_date") %>&checkout_date=<%= request.getParameter("end_date") %>" class="btn btn-success">Book Now</a>
+                <div class="col-md-4">
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Room No: <%= room.getId() %></h5>
+                            <h6 class="card-subtitle mb-2 text-muted">Type: <%= room.getType() %></h6>
+                            <p class="card-text">Price: ₹<%= room.getPrice() %> / night</p>
+                            <p class="card-text">Facilities: <%= room.getFacility() %></p>
+                            <a href="book-room?id=<%= room.getId() %>&checkin_date=<%= startDateParam %>&checkout_date=<%= endDateParam %>"
+                               class="btn btn-success book-btn">Book Now</a>
+                        </div>
                     </div>
                 </div>
+        <%  }
+        } else if (startDateParam != null && endDateParam != null) { %>
+            <div class="col-12 text-center">
+                <div class="alert alert-warning">No rooms available for selected dates.</div>
             </div>
-        <% }
-        } %>
+        <% } %>
     </div>
 </div>
 
+<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <script>
-    const checkInCalendar = flatpickr("#start_date", {
+    const startDateInput = document.getElementById("start_date");
+    const endDateInput = document.getElementById("end_date");
+    const alertBox = document.getElementById("dateAlert");
+
+    const checkInCalendar = flatpickr(startDateInput, {
         minDate: new Date().fp_incr(14),
         dateFormat: "Y-m-d",
-        onChange: function(selectedDates, dateStr, instance) {
-            checkOutCalendar.set("minDate", dateStr);
+        onChange: function (selectedDates) {
+            if (selectedDates.length > 0) {
+                checkOutCalendar.set("minDate", new Date(selectedDates[0].getTime() + 86400000));
+            }
         }
     });
 
-    const checkOutCalendar = flatpickr("#end_date", {
-        minDate: new Date().fp_incr(14),
+    const checkOutCalendar = flatpickr(endDateInput, {
+        minDate: new Date().fp_incr(15),
         dateFormat: "Y-m-d",
+    });
+
+    function showAlert(message) {
+        alertBox.textContent = message;
+        alertBox.classList.remove("d-none");
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    startDateInput.addEventListener('input', () => alertBox.classList.add("d-none"));
+    endDateInput.addEventListener('input', () => alertBox.classList.add("d-none"));
+
+    // Form validation
+    document.getElementById("searchForm").addEventListener("submit", function (e) {
+        const checkin = new Date(startDateInput.value);
+        const checkout = new Date(endDateInput.value);
+        if (checkout <= checkin) {
+            e.preventDefault();
+            showAlert("Checkout date must be at least 1 day after check-in date.");
+        }
+    });
+
+    // Booking validation
+    document.querySelectorAll(".book-btn").forEach(btn => {
+        btn.addEventListener("click", function (e) {
+            const checkin = new Date(startDateInput.value);
+            const checkout = new Date(endDateInput.value);
+
+            if (!startDateInput.value || !endDateInput.value || checkout <= checkin) {
+                e.preventDefault();
+                showAlert("Checkout date must be at least 1 day after check-in date.");
+            }
+        });
     });
 </script>
 

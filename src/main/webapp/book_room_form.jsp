@@ -25,20 +25,24 @@
         </div>
     <% } %>
 
-    <form action="confirm-booking" method="post">
+    <!-- JS Alert for date validation -->
+    <div id="dateAlert" class="alert alert-danger d-none" role="alert">
+        Checkout date must be at least 1 day after check-in date.
+    </div>
+
+    <form id="bookingForm" action="confirm-booking" method="post">
         <input type="hidden" name="room_id" value="<%= room.getId() %>">
 
         <div class="mb-3">
             <label class="form-label">Check-in Date</label>
             <input type="text" id="checkin_date" class="form-control" name="checkin_date"
-       value="<%= request.getAttribute("checkin_date") != null ? request.getAttribute("checkin_date") : "" %>" required>
-
+                   value="<%= request.getAttribute("checkin_date") != null ? request.getAttribute("checkin_date") : "" %>" required>
         </div>
 
         <div class="mb-3">
             <label class="form-label">Check-out Date</label>
             <input type="text" id="checkout_date" class="form-control" name="checkout_date"
-       value="<%= request.getAttribute("checkout_date") != null ? request.getAttribute("checkout_date") : "" %>" required>
+                   value="<%= request.getAttribute("checkout_date") != null ? request.getAttribute("checkout_date") : "" %>" required>
         </div>
 
         <div class="mb-3">
@@ -80,17 +84,46 @@
     const minCheckin = new Date();
     minCheckin.setDate(minCheckin.getDate() + 13);
 
+    const checkinInput = document.getElementById("checkin_date");
+    const checkoutInput = document.getElementById("checkout_date");
+    const alertBox = document.getElementById("dateAlert");
+
     const checkinCalendar = flatpickr("#checkin_date", {
         minDate: minCheckin,
         dateFormat: "Y-m-d",
-        onChange: function (selectedDates, dateStr, instance) {
-            checkoutCalendar.set("minDate", dateStr);
+        onChange: function (selectedDates) {
+            if (selectedDates.length > 0) {
+                const minCheckout = new Date(selectedDates[0].getTime() + 24 * 60 * 60 * 1000);
+                checkoutCalendar.set("minDate", minCheckout);
+            }
         }
     });
 
     const checkoutCalendar = flatpickr("#checkout_date", {
         minDate: minCheckin,
         dateFormat: "Y-m-d",
+    });
+
+    // Helper to show alert
+    function showAlert(message) {
+        alertBox.textContent = message;
+        alertBox.classList.remove("d-none");
+        window.scrollTo({top: 0, behavior: "smooth"});
+    }
+
+    // Clear alert on input
+    checkinInput.addEventListener('change', () => alertBox.classList.add("d-none"));
+    checkoutInput.addEventListener('change', () => alertBox.classList.add("d-none"));
+
+    // Validate on form submission
+    document.getElementById("bookingForm").addEventListener("submit", function (e) {
+        const checkin = new Date(checkinInput.value);
+        const checkout = new Date(checkoutInput.value);
+
+        if (!checkinInput.value || !checkoutInput.value || checkout <= checkin) {
+            e.preventDefault();
+            showAlert("Checkout date must be at least 1 day after check-in date.");
+        }
     });
 </script>
 </body>

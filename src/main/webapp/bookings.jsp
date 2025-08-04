@@ -1,8 +1,10 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List" %>
 <%@ page import="com.reservation.model.Booking" %>
+<%@ page import="java.time.LocalDate" %>
 <%
     List<Booking> bookings = (List<Booking>) request.getAttribute("bookings");
+    LocalDate today = LocalDate.now();
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -30,9 +32,12 @@
             </tr>
             </thead>
             <tbody>
-            <% for (Booking b : bookings) { %>
+            <% for (Booking b : bookings) {
+                boolean isCancelled = b.isCancelled();
+                LocalDate checkinDate = LocalDate.parse(b.getCheckinDate());
+                boolean canCancel = !isCancelled && checkinDate.isAfter(today);
+            %>
                 <tr>
-
                     <td>
                         <a href="booking-details?booking_id=<%= b.getBookingId() %>" class="text-decoration-none text-primary">
                             <%= b.getBookingId() %>
@@ -43,10 +48,10 @@
                     <td><%= b.getCheckoutDate() %></td>
                     <td><%= b.getStayDays() %></td>
                     <td><%= b.getName() %></td>
-                    <td><%= b.isCancelled() ? "Cancelled" : "Confirmed" %></td>
+                    <td><%= isCancelled ? "Cancelled" : "Confirmed" %></td>
                     <td>₹ <%= b.getCancellationFee() %></td>
                     <td>
-                        <% if (!b.isCancelled()) { %>
+                        <% if (canCancel) { %>
                             <button class="btn btn-danger btn-sm"
                                     data-bs-toggle="modal"
                                     data-bs-target="#cancelModal"
@@ -55,7 +60,9 @@
                                 Cancel
                             </button>
                         <% } else { %>
-                            <button class="btn btn-secondary btn-sm" disabled>Cancelled</button>
+                            <button class="btn btn-secondary btn-sm" disabled>
+                                <%= isCancelled ? "Cancelled" : "Not Allowed" %>
+                            </button>
                         <% } %>
                     </td>
                 </tr>
@@ -64,7 +71,6 @@
         </table>
     </div>
 </div>
-
 
 <!-- Cancel Modal -->
 <div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
