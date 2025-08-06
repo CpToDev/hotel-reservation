@@ -54,10 +54,14 @@
     </form>
 
     <h3 class="text-center mb-4">Available Rooms</h3>
-    <div class="row">
-        <% if (rooms != null && !rooms.isEmpty()) {
+    <div class="row" id="roomContainer">
+        <% if ((startDateParam == null || endDateParam == null) || (startDateParam.isEmpty() || endDateParam.isEmpty())) { %>
+            <div class="col-12 text-center">
+                <div id="emptyDateAlert" class="alert alert-warning d-none">Please select both Check-in and Check-out dates to view available rooms.</div>
+            </div>
+        <% } else if (rooms != null && !rooms.isEmpty()) {
             for (Room room : rooms) { %>
-                <div class="col-md-4">
+                <div class="col-md-4 room-card">
                     <div class="card mb-4 shadow-sm">
                         <div class="card-body">
                             <h5 class="card-title">Room No: <%= room.getId() %></h5>
@@ -111,16 +115,6 @@
     startDateInput.addEventListener('input', () => alertBox.classList.add("d-none"));
     endDateInput.addEventListener('input', () => alertBox.classList.add("d-none"));
 
-    // Form validation
-    document.getElementById("searchForm").addEventListener("submit", function (e) {
-        const checkin = new Date(startDateInput.value);
-        const checkout = new Date(endDateInput.value);
-        if (checkout <= checkin) {
-            e.preventDefault();
-            showAlert("Checkout date must be at least 1 day after check-in date.");
-        }
-    });
-
     // Booking validation
     document.querySelectorAll(".book-btn").forEach(btn => {
         btn.addEventListener("click", function (e) {
@@ -132,6 +126,57 @@
                 showAlert("Checkout date must be at least 1 day after check-in date.");
             }
         });
+    });
+    startDateInput.addEventListener('input', () => {
+    document.getElementById("emptyDateAlert").classList.add("d-none");
+    });
+
+    endDateInput.addEventListener('input', () => {
+        document.getElementById("emptyDateAlert").classList.add("d-none");
+    });
+    document.getElementById("searchForm").addEventListener("submit", function (e) {
+    const checkin = startDateInput.value.trim();
+    const checkout = endDateInput.value.trim();
+    const checkinDate = new Date(checkin);
+    const checkoutDate = new Date(checkout);
+
+    const emptyDateAlert = document.getElementById("emptyDateAlert");
+
+    // If either date is missing
+    if (!checkin || !checkout) {
+        e.preventDefault();
+        emptyDateAlert.classList.remove("d-none");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+    }
+
+    // If checkout is not after checkin
+    if (checkoutDate <= checkinDate) {
+        e.preventDefault();
+        showAlert("Checkout date must be at least 1 day after check-in date.");
+        return;
+    }
+
+    // Dates are valid, hide the alert if shown
+    emptyDateAlert.classList.add("d-none");
+});
+
+
+
+
+    // Show available rooms manually if dates are missing
+    document.addEventListener("DOMContentLoaded", () => {
+        const showBtn = document.getElementById("showRoomsBtn");
+        const roomCards = document.querySelectorAll(".room-card");
+
+        if (showBtn) {
+            roomCards.forEach(card => card.classList.add("d-none"));
+
+            showBtn.addEventListener("click", () => {
+                roomCards.forEach(card => card.classList.remove("d-none"));
+                showBtn.style.display = "none";
+            });
+        }
     });
 </script>
 
